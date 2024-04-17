@@ -1,3 +1,6 @@
+//come scrollo sulla visione modale?
+//problema di flex-shrink 
+
 const navClick = document.querySelectorAll('.header_nav_lower span');
 const popUpMenu = document.querySelectorAll('.pop_up_menu');
 const closeButton = document.querySelectorAll('.close');
@@ -13,7 +16,11 @@ const searchIconScroll = document.querySelector ('.header_scroll img');
 const textBoxMail = document.querySelectorAll('.a');
 const form_hotel = document.querySelector('#modal_view_hotel form');
 const modalViewHotel = document.querySelector('#modal_view_hotel');
-const my_api_key = "838310cca6msh7d61d361461e895p122d46jsn6a90eb379efb";
+const hotel_grid = document.querySelector('.hotel_grid');
+const nearby_hotel_click = document.querySelectorAll('.hotel');
+const my_api_key = '605fe4c119msh474c466ec9a765dp14fd40jsn77c52d3be8dc';
+//chiavi scadute "838310cca6msh7d61d361461e895p122d46jsn6a90eb379efb"
+//chiavi non usate '022b4901d2mshc22ec5bba4faa35p19c891jsndd905e2f2fba'
 const latitude = "40.730610";
 const longitude = "-73.935242";
 
@@ -209,6 +216,7 @@ for(t of textBoxMail){
 ///////////////////////////////////////////////////////// API ////////////////
 
 function onJson(json) {
+    hotel_grid.innerHTML='';
     console.log(json);
     const status = json.status;
     if(status === false){
@@ -222,14 +230,40 @@ function onJson(json) {
         for(result of list_result){
             const title = result.title;
             const rating = result.bubbleRating.rating;
-            const canc = result.priceDetails;
-            const price = result.priceForDisplay;
+            const price_number = result.priceForDisplay;
+            const price = String(price_number);
             const provider = result.provider;
             const photo_list = result.cardPhotos;  
             const photo_full= photo_list[0].sizes.urlTemplate;
             const photo_array = photo_full.split('?');
             const photo = photo_array [0];
             const url_booking = result.commerceInfo.externalUrl;
+            //aggiungo gli elementi estratti dalla query
+            const hotel_box = document.createElement("div");
+            hotel_grid.appendChild(hotel_box);
+            hotel_box.classList.add('single_hotel');
+
+            const h1 = document.createElement("h1");
+            h1.textContent=title;
+            const span1 = document.createElement("span");
+            span1.textContent= 'rating: ' + rating;
+            const img = document.createElement("img");
+            img.src=photo;
+            const span2 = document.createElement("span");
+            span2.textContent= 'provider: ' + provider;
+            const span3 = document.createElement("span");
+            span3.textContent= 'price: ' + price;
+            const link = document.createElement("a");
+            link.href=url_booking;
+            link.textContent='book now';
+
+            
+            hotel_box.appendChild(h1);
+            hotel_box.appendChild(span1);
+            hotel_box.appendChild(img);
+            hotel_box.appendChild(span2);
+            hotel_box.appendChild(span3);
+            hotel_box.appendChild(link);
             
         }
     }
@@ -255,7 +289,6 @@ function search(event) {
     const rooms_value = encodeURIComponent(rooms.value);
   
     const url = 'https://tripadvisor16.p.rapidapi.com/api/v1/hotels/searchHotelsByLocation?latitude=' + latitude + '&longitude=' + longitude + '&checkIn=' + check_in_value + '&checkOut=' + check_out_value +'&pageNumber=1&adults=' + adults_value + '&rooms=' + rooms_value + '&currencyCode=USD';
-    //const url = 'https://tripadvisor16.p.rapidapi.com/api/v1/hotels/searchHotelsByLocation?latitude=40.730610&longitude=-73.935242&checkIn=2024-04-23&checkOut=2024-04-27&pageNumber=1&adults=1&rooms=1&currencyCode=USD';
     const options = {
       method: "GET",
       headers: {
@@ -269,6 +302,22 @@ function search(event) {
 
 form_hotel.addEventListener('submit', search);
 
+function modalHotel(){
+    modalViewHotel.classList.remove('hidden');
+    document.body.classList.remove('no-scroll'); //perche sui click nella navbar c'è una funzione che leva lo scroll
+}
 
-  
-  
+for (n of nearby_hotel_click) { 
+    n.addEventListener('click', modalHotel);
+}
+
+function hideModalHotel (event){
+    if(event.key === "Escape"){
+        modalViewHotel.classList.add('hidden');
+        document.body.classList.remove('no-scroll'); //perche sui click nella navbar c'è una funzione che leva lo scroll
+    }
+
+}
+
+document.addEventListener('keydown', hideModalHotel);
+

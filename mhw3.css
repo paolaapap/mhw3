@@ -208,16 +208,17 @@ header {
 }
 
 #modal_view_hotel{
-    position: fixed;
-    top: 0;
+    position: absolute;
+    top: 0px;
     left: 0;
-    height: 100vh;
     width: 98%;
+    height: 7000px;
     background-color: white; 
     z-index: 3;     
     padding-top: 24px;
     padding-left: 24px;
     padding-right: 24px;
+    overflow: auto;
 }
 
 #modal_view_hotel form{
@@ -249,14 +250,55 @@ input[type="text"] {
 
 #modal_view_hotel .box {
     width: 20%;
-    height: 8%;
+    height: 20%;
 }
+
 #modal_view_hotel input::placeholder{
     text-align: center;
 }
 
-.hotel_result{
-    
+.hotel_grid{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;    
+}
+
+.single_hotel{
+    width: 25%;
+    height: 450px;
+    font-family: "Lalezar", system-ui;
+    font-size: 1.2rem;
+    color: black;
+    border: 3px solid black;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.single_hotel h1, .single_hotel img, .single_hotel span, .single_hotel a{
+    flex-shrink: 1;
+}
+
+.single_hotel img{
+    width: 300px;
+    height: 250px;
+    object-fit: cover;
+}
+
+.single_hotel h1{
+    margin: 12px;
+    text-align: center;
+}
+
+.single_hotel a{
+    color:#00AFD7;
+}
+
+.single_hotel a:visited{
+    color: #00AFD7;
 }
 
 .error_message{
