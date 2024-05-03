@@ -10,6 +10,7 @@
       <link href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css2?family=Ysabeau+Infant:ital,wght@0,1..1000;1,1..1000&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Sedgwick+Ave+Display&display=swap" rel="stylesheet">
       <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
@@ -72,7 +73,14 @@
         <span class="close">X</span>
     </section>
     <section id="modal_view" class='modal_view hidden'>
-        <input type="text" spellcheck="false" placeholder="Search on MoMA.org" class='text_box'>
+        <form>
+            <input type="text" spellcheck="false" placeholder="Search an artist on MoMA.org" class='text_box'>
+            <input type="submit" id="submit_artist" value="">
+        </form>
+    </section>
+    <section id="modal_view_artworks" class='hidden'>
+        <div id="artworks_results">
+        </div>
     </section>
     <section id="modal_view_hotel" class='hidden'>
         <form>

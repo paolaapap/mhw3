@@ -1,5 +1,8 @@
-//come scrollo sulla visione modale?
+//ontokenrespon sistemala!!!
 //problema di flex-shrink 
+//quando clicclo esc il testo di svuota (hotel)
+//ricorda di levare i console.log
+//newsletter
 
 const navClick = document.querySelectorAll('.header_nav_lower span');
 const popUpMenu = document.querySelectorAll('.pop_up_menu');
@@ -11,11 +14,14 @@ const header_fix = document.querySelector('header');
 const navClickScroll = document.querySelectorAll('.header_scroll span');
 const search_icon = document.querySelector('.header_nav_lower img');
 const modalView = document.querySelector('#modal_view');
+const modalViewForm = document.querySelector('#modal_view form');
 const textBox = document.querySelector('.text_box');
 const searchIconScroll = document.querySelector ('.header_scroll img');
 const textBoxMail = document.querySelectorAll('.a');
 const form_hotel = document.querySelector('#modal_view_hotel form');
 const modalViewHotel = document.querySelector('#modal_view_hotel');
+const modalViewArtworks = document.querySelector('#modal_view_artworks');
+const artworkResults = document.querySelector('#artworks_results');
 const hotel_grid = document.querySelector('.hotel_grid');
 const nearby_hotel_click = document.querySelectorAll('.hotel');
 const my_api_key = '605fe4c119msh474c466ec9a765dp14fd40jsn77c52d3be8dc';
@@ -23,7 +29,9 @@ const my_api_key = '605fe4c119msh474c466ec9a765dp14fd40jsn77c52d3be8dc';
 //chiavi non usate '022b4901d2mshc22ec5bba4faa35p19c891jsndd905e2f2fba'
 const latitude = "40.730610";
 const longitude = "-73.935242";
-
+const client_id = "b29a8bd46d37ea752b70";
+const client_secret ="c2bef07647734ee67d2b7e86b47469a0";
+let token;
 
 
 function showMenu (event){
@@ -73,7 +81,6 @@ function changeImg(event) {
     switch (index) {
         case 1:
             image.src = 'images/s1_js.jpg';
-            console.log('suca');
             break;
         case 2:
             image.src = 'images/s2_js.jpg';
@@ -182,7 +189,7 @@ function onWriteText(){
     const newDiv = document.createElement("span");  
     newDiv.textContent='CANCEL';
     newDiv.classList.add('modal_view_div');
-    modalView.appendChild(newDiv); 
+    modalViewForm.appendChild(newDiv); 
     textBox.removeEventListener('input', onWriteText);
     newDiv.addEventListener('click', deleteText); 
     newDiv.addEventListener('click', stopProp);
@@ -320,4 +327,122 @@ function hideModalHotel (event){
 }
 
 document.addEventListener('keydown', hideModalHotel);
+
+////////////////// API CON OAUTH ///////////////////////////////////////////
+
+fetch("https://api.artsy.net/api/tokens/xapp_token?client_id=" + client_id + "&client_secret=" + client_secret,
+{
+    method: "post"
+}
+).then(onResponse).then(onTokenJson);
+
+
+function onTokenJson(json)
+{
+  console.log(json)
+  token = json.token;
+}
+
+function onTokenResponse(response)
+{
+  return response.json();
+}
+
+function search2(event){
+    event.preventDefault();
+    let url = "https://api.artsy.net/api/artists/";
+    //il testo inserito dall'utente deve essere separato da trattini
+    const user_input = textBox.value;
+    console.log(user_input);
+    const array = user_input.split(" ");
+    for (let i=0; i<array.length; i++){
+        if(i!=array.length-1)
+            url += array[i] + "-";
+        else url += array[i];
+    }
+    fetch(url, 
+    {
+      headers:
+      {
+        'X-Xapp-Token':  token
+      }
+    }
+  ).then(onResponse).then(onJson2);
+
+  
+}
+
+let artist_name;
+let artist_location;
+
+function onJson2(json){
+    console.log(json);
+    artist_name = json.name; //nome
+    artist_location = json.location; //localita
+    const id_artist = json.id;
+    let url_artworks = "https://api.artsy.net/api/artworks?artist_id=";
+    fetch(url_artworks + id_artist, 
+        {
+          headers:
+          {
+            'X-Xapp-Token':  token
+          }
+        }
+      ).then(onResponse).then(onJson3);
+
+}
+
+function onJson3(json){
+    modalView.classList.add('hidden');
+    modalViewArtworks.classList.remove('hidden');
+    textBox.value="";
+    artworkResults.innerHTML='';
+    const h1_remove = modalViewArtworks.querySelectorAll('h1');
+    for (h of h1_remove)
+        h.remove();
+
+    const name = document.createElement("h1");
+    name.textContent=artist_name;
+    modalViewArtworks.insertBefore(name, artworkResults);
+    const loc = document.createElement("h1");
+    loc.textContent=artist_location;
+    modalViewArtworks.insertBefore(loc, artworkResults);
+
+    console.log(json); 
+    const artworks = json._embedded.artworks;
+    const thum_src = [];
+    const titles = [];
+    console.log(artworks);
+    for (let i=0; i<artworks.length; i++){
+            thum_src[i] = artworks[i]._links.thumbnail.href;
+            titles[i]=artworks[i].title;
+    }
+    
+    for(let i=0; i<thum_src.length; i++){
+        const new_div = document.createElement("div");
+        artworkResults.appendChild(new_div);
+        new_div.classList.add('artworks_and_title');
+        const img = document.createElement("img");
+        img.src=thum_src[i];
+        const title = document.createElement("span");
+        title.textContent=titles[i];
+        new_div.appendChild(img);
+        new_div.appendChild(title);
+    } 
+
+    document.body.classList.add('no-scroll');
+    modalViewArtworks.classList.add('scroll');
+}
+
+modalViewForm.addEventListener('submit', search2);
+
+function hideArtworks(event){
+    modalViewArtworks.classList.add('hidden');
+    document.body.classList.remove('no-scroll');
+    modalViewArtworks.classList.remove('scroll');
+}
+
+modalViewArtworks.addEventListener('click', hideArtworks);
+artworkResults.addEventListener('click', stopProp);
+
 
