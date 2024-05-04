@@ -1,12 +1,11 @@
-//ontokenrespon sistemala!!!
 //problema di flex-shrink 
-//quando clicclo esc il testo di svuota (hotel)
-//ricorda di levare i console.log
-//newsletter
+
 
 const navClick = document.querySelectorAll('.header_nav_lower span');
 const popUpMenu = document.querySelectorAll('.pop_up_menu');
 const closeButton = document.querySelectorAll('.close');
+const bookATour = document.querySelector('.tour');
+const customTour = document.querySelector('.custom_tour');
 const images = document.querySelectorAll('.section-box img');
 const header_scroll = document.querySelector('.header_scroll');
 const white_bar = document.querySelector('.white');
@@ -25,13 +24,35 @@ const artworkResults = document.querySelector('#artworks_results');
 const hotel_grid = document.querySelector('.hotel_grid');
 const nearby_hotel_click = document.querySelectorAll('.hotel');
 const my_api_key = '605fe4c119msh474c466ec9a765dp14fd40jsn77c52d3be8dc';
-//chiavi scadute "838310cca6msh7d61d361461e895p122d46jsn6a90eb379efb"
 //chiavi non usate '022b4901d2mshc22ec5bba4faa35p19c891jsndd905e2f2fba'
 const latitude = "40.730610";
 const longitude = "-73.935242";
 const client_id = "b29a8bd46d37ea752b70";
 const client_secret ="c2bef07647734ee67d2b7e86b47469a0";
 let token;
+let source = [
+    "GetYourGuide",
+    "Viator",
+    "The Reninsula Hotels",
+    "Civitatis",
+    "New York Tours Plus",
+    "The Men Event",
+    "Headout",
+    "Klook",
+    "Expedia.com",
+    "www.tourappeal.com",
+    "Trip Savvy",
+    "Tripadvisor"
+];
+const api_key_joj = '838310cca6msh7d61d361461e895p122d46jsn6a90eb379efb';
+//chiavi non usate '022b4901d2mshc22ec5bba4faa35p19c891jsndd905e2f2fba', '605fe4c119msh474c466ec9a765dp14fd40jsn77c52d3be8dc'
+const bookATour_section = document.querySelector('#book_a_tour');
+const close_custom_tour = document.querySelector('#close_custom_tour');
+const custom_tour_section = document.querySelector('#custom_tour');
+const custom_tour_form = document.querySelector('#custom_tour form');
+const api_key_chatgpt = '022b4901d2mshc22ec5bba4faa35p19c891jsndd905e2f2fba';
+const text_by_chatgpt = custom_tour_section.querySelector('span');
+const tour_click = document.querySelector('.custom_tour');
 
 
 function showMenu (event){
@@ -224,7 +245,6 @@ for(t of textBoxMail){
 
 function onJson(json) {
     hotel_grid.innerHTML='';
-    console.log(json);
     const status = json.status;
     if(status === false){
         const err_message = document.createElement("h1");
@@ -271,6 +291,12 @@ function onJson(json) {
             hotel_box.appendChild(span2);
             hotel_box.appendChild(span3);
             hotel_box.appendChild(link);
+            h1.classList.add('shrink');
+            span1.classList.add('shrink');
+            img.classList.add('shrink');
+            span2.classList.add('shrink');
+            span3.classList.add('shrink');
+            link.classList.add('shrink');
             
         }
     }
@@ -322,6 +348,10 @@ function hideModalHotel (event){
     if(event.key === "Escape"){
         modalViewHotel.classList.add('hidden');
         document.body.classList.remove('no-scroll'); //perche sui click nella navbar c'è una funzione che leva lo scroll
+        const input = document.querySelectorAll('#modal_view_hotel .box');
+        for(i of input)
+            i.value="";
+        hotel_grid.innerHTML='';
     }
 
 }
@@ -343,17 +373,12 @@ function onTokenJson(json)
   token = json.token;
 }
 
-function onTokenResponse(response)
-{
-  return response.json();
-}
 
 function search2(event){
     event.preventDefault();
     let url = "https://api.artsy.net/api/artists/";
     //il testo inserito dall'utente deve essere separato da trattini
     const user_input = textBox.value;
-    console.log(user_input);
     const array = user_input.split(" ");
     for (let i=0; i<array.length; i++){
         if(i!=array.length-1)
@@ -376,7 +401,6 @@ let artist_name;
 let artist_location;
 
 function onJson2(json){
-    console.log(json);
     artist_name = json.name; //nome
     artist_location = json.location; //localita
     const id_artist = json.id;
@@ -408,11 +432,9 @@ function onJson3(json){
     loc.textContent=artist_location;
     modalViewArtworks.insertBefore(loc, artworkResults);
 
-    console.log(json); 
     const artworks = json._embedded.artworks;
     const thum_src = [];
     const titles = [];
-    console.log(artworks);
     for (let i=0; i<artworks.length; i++){
             thum_src[i] = artworks[i]._links.thumbnail.href;
             titles[i]=artworks[i].title;
@@ -445,4 +467,169 @@ function hideArtworks(event){
 modalViewArtworks.addEventListener('click', hideArtworks);
 artworkResults.addEventListener('click', stopProp);
 
+////////////////////// TERZA API ////////////////////////////
 
+function onJson4(json) {
+    for (p of popUpMenu)
+        p.classList.add('hidden');
+    bookATour_section.classList.remove('hidden');
+    document.body.classList.add('no-scroll');
+    bookATour_section.classList.add('scroll');
+    bookATour_section.innerHTML='';
+    const result = json.response.images;
+    const titles = [];
+    const img = [];
+    const provider = [];
+    const link = [];
+    let j = 0;
+    for (r of result){
+        for (let i=0; i<source.length; i++){
+            if(r.source.name==source[i]){
+                //prendi i campi
+                titles[j]=r.source.title;
+                img[j]=r.image.url;
+                link[j]=r.source.page;
+                provider[j]=r.source.name;
+                j++;
+                break;
+            }
+            else i++;
+        }
+        
+    }
+
+    // se ha trovato la stessa cosa piu volte, la rimuovo
+    for(let i=0; i<(link.length-1); i++){
+        if(link[i]==link[i+1]){
+            titles.splice(i,1);
+            img.splice(i,1);
+            provider.splice(i,1);
+            link.splice(i,1);
+        }
+    }
+
+    const close_button = document.createElement("span");
+    close_button.textContent="CLOSE";
+    bookATour_section.appendChild(close_button);
+    close_button.classList.add('close_button');
+
+    for(let i=0; i<titles.length; i++){
+        const div = document.createElement("div");
+        bookATour_section.appendChild(div);
+        const t = document.createElement("h1");
+        div.appendChild(t);
+        const div2 = document.createElement("div");
+        div.appendChild(div2);
+        div2.classList.add('div2');
+        const im = document.createElement("img");
+        div2.appendChild(im);
+        const div3 = document.createElement("div");
+        div2.appendChild(div3);
+        div3.classList.add('div3');
+        const l = document.createElement("a");
+        div3.appendChild(l);
+        const p = document.createElement("span");
+        div3.appendChild(p);
+
+
+        t.textContent=titles[i];
+        im.src=img[i];
+        p.textContent="by: " + provider[i];
+        l.href=link[i];
+        l.textContent="Reserve now";
+
+    }
+
+    close_button.addEventListener('click', close_tour);
+}
+
+function close_tour(){
+    bookATour_section.classList.add('hidden');
+    document.body.classList.remove('no-scroll');
+    bookATour_section.classList.remove('scroll');
+}
+  
+
+
+function search3(event) {
+    event.preventDefault();
+    const url = 'https://joj-image-search.p.rapidapi.com/v2/?q=moma%20tour&hl=en';
+    const options = {
+      method: "GET",
+      headers: {
+        "X-RapidAPI-Key": api_key_joj,
+        "X-RapidAPI-Host": 'joj-image-search.p.rapidapi.com',
+      },
+    };
+
+    fetch(url, options).then(onResponse).then(onJson4);
+}
+
+bookATour.addEventListener('click', search3);
+
+
+//////////////////////////////// QUARTA API ///////////////////////////
+function openCustomTour(){
+    for (p of popUpMenu)
+        p.classList.add('hidden');
+    custom_tour_section.classList.remove('hidden');
+    document.body.classList.add('no-scroll');
+    custom_tour_section.classList.add('scroll');
+    text_by_chatgpt.innerHTML='';
+}
+
+tour_click.addEventListener('click', openCustomTour);
+
+function onJson5(json) {
+    console.log(json);
+    const result_text = json.choices[0].message.content;
+    const span = document.createElement("span");
+    custom_tour_section.appendChild(span);
+    span.classList.add(span_chatgpt);
+    span.textContent=result_text;
+}
+  
+
+function search4(event) {
+    event.preventDefault();
+    const user_tex = document.querySelector("#chatgpt_text");
+    const user_input = user_tex.value;
+
+    const url = 'https://chat-gpt26.p.rapidapi.com/';
+    const options = {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'Content-Type': 'application/json',
+            'X-RapidAPI-Key': api_key_chatgpt,
+            'X-RapidAPI-Host': 'chat-gpt26.p.rapidapi.com'
+        },
+        body: {
+            model: 'gpt-3.5-turbo',
+            messages: [
+                {
+                    role: 'user',
+                    content: "\'" + user_input + "\'"
+                }
+            ]
+        }
+    };
+
+    fetch(url, options).then(onResponse).then(onJson5); 
+}
+
+custom_tour_form.addEventListener('submit', search4);
+
+
+
+function hideCustomTour (event){
+        custom_tour_section.classList.add('hidden');
+        document.body.classList.remove('no-scroll');
+        bookATour_section.classList.remove('scroll');
+        const user = document.querySelector('#chatgpt_text');
+        user.value="";
+        text_by_chatgpt.innerHTML='';
+}
+
+
+close_custom_tour.addEventListener('click', hideCustomTour);

@@ -46,14 +46,25 @@
             </div>
         </div>
     </section>
+    <section id="book_a_tour" class="hidden"></section>
+    <section id="custom_tour" class="hidden">
+        <div id="close_custom_tour" class="close_button">CLOSE</div>
+        <h1>Request a tour that is specifically designed for you, <br>
+            based on your specific interests and duration.
+        </h1>
+        <form>
+            <input type="text" spellcheck="false" placeholder="Make your request" id="chatgpt_text">
+            <input type="submit" id="submit_chatgpt" value="&#8594;">   
+        </form>
+    </section>
     <section id="pop_up_m_v" class='pop_up_menu hidden'>
         <span>Tickets</span>
         <span>Locations,hours,and admission</span>
         <span>Map,audio,and more</span>
         <span>Where to start</span>
-        <span>Visitor guidelines and policies</span>
+        <span class="custom_tour">Customized tours</span>
         <span>Frequently asked questions</span>
-        <span>Book a tour</span>
+        <span class="tour">Book a tour</span>
         <span class="close">X</span>
     </section>
     <section id="pop_up_m_w" class='pop_up_menu hidden'>
